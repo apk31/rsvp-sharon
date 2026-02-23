@@ -1,4 +1,4 @@
-import { Guest } from "./types"
+import type { Guest } from "../types"
 
 const SHEET_ID = "1lJjs9D8m7LWgQ0HA7SEWAkyIC572QR8SgqLD9CpTKF8"
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`
@@ -12,7 +12,7 @@ export async function fetchGuests(): Promise<{
 
   const json = JSON.parse(text.substring(47).slice(0, -2))
 
-  const rows = json.table.rows
+  const rows = json.table.rows.slice(1) // skip header
 
   const data: Guest[] = rows.map((row: any) => ({
     no: row.c[0]?.v || 0,

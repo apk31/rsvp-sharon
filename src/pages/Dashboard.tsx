@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { fetchGuests } from "../api"
-import { Guest } from "../types"
+import type { Guest } from "../types"
 
 export default function Dashboard() {
   const [guests, setGuests] = useState<Guest[]>([])
@@ -22,20 +22,41 @@ export default function Dashboard() {
   const totalHadirOrang = guests.reduce((acc, g) => acc + g.attending, 0)
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <h1 className="text-4xl font-bold">Dashboard</h1>
 
-      <h3>Undangan</h3>
-      <p>Total: {totalUndangan}</p>
-      <p>Hadir: {hadir.length}</p>
-      <p>Tidak Hadir: {tidakHadir.length}</p>
-      <p>No Info: {noInfo.length}</p>
+      <div className="grid md:grid-cols-4 gap-6">
+        <Card title="Total Undangan" value={totalUndangan} />
+        <Card title="Hadir" value={hadir.length} color="green" />
+        <Card title="Tidak Hadir" value={tidakHadir.length} color="red" />
+        <Card title="Tanpa Info" value={noInfo.length} color="yellow" />
+      </div>
 
-      <h3>Jumlah Orang</h3>
-      <p>Total Orang Diundang: {totalOrang}</p>
-      <p>Total Orang Hadir: {totalHadirOrang}</p>
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card title="Total Orang Diundang" value={totalOrang} />
+        <Card title="Total Orang Hadir" value={totalHadirOrang} color="green" />
+      </div>
 
-      <p>Last Update: {lastUpdate}</p>
+      <p className="text-sm text-slate-400">
+        Last Update: {lastUpdate}
+      </p>
+    </div>
+  )
+}
+
+function Card({ title, value, color }: any) {
+  const colorMap: any = {
+    green: "text-green-400",
+    red: "text-red-400",
+    yellow: "text-yellow-400",
+  }
+
+  return (
+    <div className="bg-slate-800 rounded-xl p-6 shadow-lg">
+      <p className="text-slate-400 text-sm">{title}</p>
+      <p className={`text-3xl font-bold mt-2 ${colorMap[color] || ""}`}>
+        {value}
+      </p>
     </div>
   )
 }
