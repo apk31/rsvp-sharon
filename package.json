@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   
-  "homepage": "https://USERNAME.github.io/REPO_NAME",
+  "homepage": "https://apk31.github.io/rsvp-sharon",
 "scripts": {
   "build": "tsc && vite build",
   "predeploy": "npm run build",
