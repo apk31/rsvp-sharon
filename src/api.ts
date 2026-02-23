@@ -2,8 +2,8 @@ import type { Guest } from "./types"
 
 const SHEET_ID = "1lJjs9D8m7LWgQ0HA7SEWAkyIC572QR8SgqLD9CpTKF8"
 
-const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=guestlist`
-const META_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=meta`
+const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`
+// const META_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=meta`
 
 function parseCSV(text: string): string[][] {
   return text
@@ -28,31 +28,34 @@ export async function fetchGuests(): Promise<{
     const csvText = await res.text()
 
     const rows = parseCSV(csvText)
+    const header = rows[0]
+const dataRows = rows.slice(1)
 
-    // Buang header
-    const dataRows = rows.slice(1)
-
-    const data: Guest[] = dataRows.map(row => ({
-      no: Number(row[0]) || 0,
-      noUndangan: Number(row[1]) || 0,
-      nama: row[2] || "",
-      person: Number(row[3]) || 0,
-      grup: row[4] || "",
-      rsvp: row[5] || "",
-      noWhatsapp: row[6] || "",
-      linkWa: row[7] || "",
-      url: row[8] || "",
-      qrCode: row[9] || "",
-      attending: Number(row[10]) || 0,
-    }))
-
+const getIndex = (name: string) =>
+  header.findIndex(h => h.trim() === name.trim())
+  
+const data: Guest[] = dataRows.map(row => ({
+  no: Number(row[getIndex("No")]) || 0,
+  noUndangan: Number(row[getIndex("No. Undangan")]) || 0,
+  nama: row[getIndex("Nama")] || "",
+  person: Number(row[getIndex("Person")]) || 0,
+  grup: row[getIndex("Grup/Meja")] || "",
+  rsvp: row[getIndex("RSVP")] || "",
+  noWhatsapp: row[getIndex("No. WhatsApp")] || "",
+  linkWa: row[getIndex("Link WA")] || "",
+  url: row[getIndex("URL")] || "",
+  qrCode: row[getIndex("QR Code Number")] || "",
+  attending: Number(row[getIndex("Attending")]) || 0,
+}))
+    // console.log("CSV TEXT:", csvText)
     // ===== FETCH META =====
-    const resMeta = await fetch(`${META_URL}&_=${timestamp}`)
-    const metaText = await resMeta.text()
 
-    const metaRows = parseCSV(metaText)
+    const lastUpdateIndex = getIndex("last_update")
 
-    const lastUpdated = metaRows?.[1]?.[0] || "-"
+const lastUpdated =
+  lastUpdateIndex !== -1
+    ? dataRows[0][lastUpdateIndex]
+    : "-"
 
     return {
       data,
