@@ -1,18 +1,20 @@
-import type { Guest } from "../types"
+import type { Guest } from "./types"
 
 const SHEET_ID = "1lJjs9D8m7LWgQ0HA7SEWAkyIC572QR8SgqLD9CpTKF8"
-const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`
+
+const DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=guestlist`
+const META_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=meta`
 
 export async function fetchGuests(): Promise<{
   data: Guest[]
   lastUpdated: string
 }> {
-  const res = await fetch(URL)
+
+  // ===== FETCH DATA =====
+  const res = await fetch(DATA_URL)
   const text = await res.text()
-
   const json = JSON.parse(text.substring(47).slice(0, -2))
-
-  const rows = json.table.rows.slice(1) // skip header
+  const rows = json.table.rows.slice(1)
 
   const data: Guest[] = rows.map((row: any) => ({
     no: row.c[0]?.v || 0,
@@ -28,10 +30,16 @@ export async function fetchGuests(): Promise<{
     attending: row.c[10]?.v || 0,
   }))
 
+  // ===== FETCH META =====
+  const resMeta = await fetch(META_URL)
+  const textMeta = await resMeta.text()
+  const jsonMeta = JSON.parse(textMeta.substring(47).slice(0, -2))
+
+  const lastUpdated =
+    jsonMeta.table.rows?.[1]?.c?.[0]?.v || "Failed to fetch last updated"
+
   return {
     data,
-    lastUpdated: json.table?.rows?.length
-      ? new Date().toLocaleString()
-      : "-"
+    lastUpdated,
   }
 }

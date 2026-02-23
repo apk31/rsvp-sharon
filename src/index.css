@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 body {
+  @apply bg-cream text-slate-800 transition-colors duration-300;
+}
+
+.dark body {
   @apply bg-slate-900 text-slate-100;
 }
