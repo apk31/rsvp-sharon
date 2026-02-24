@@ -2,6 +2,8 @@ import { HashRouter, Routes, Route, NavLink, useLocation } from "react-router-do
 import React, { useEffect, useState } from "react"
 import Dashboard from "./pages/Dashboard"
 import Undangan from "./pages/Undangan"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons"
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation()
@@ -107,11 +109,12 @@ useEffect(() => {
             </NavLink>
 
             <button
-              onClick={toggleTheme}
-              className="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800"
-            >
-              {dark ? "🌙 Dark" : "☀️ Light"}
-            </button>
+  onClick={toggleTheme}
+  className="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center gap-2"
+>
+  <FontAwesomeIcon icon={dark ? faMoon : faSun} />
+  {dark ? "Dark" : "Light"}
+</button>
           </div>
 
           <button
@@ -131,11 +134,12 @@ useEffect(() => {
               Undangan
             </NavLink>
             <button
-              onClick={toggleTheme}
-              className="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800"
-            >
-              {dark ? "🌙 Dark" : "☀️ Light"}
-            </button>
+  onClick={toggleTheme}
+  className="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center gap-2"
+>
+  <FontAwesomeIcon icon={dark ? faMoon : faSun} />
+  {dark ? "Dark" : "Light"}
+</button>
           </div>
         )}
       </nav>

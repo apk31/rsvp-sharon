@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react"
 import { fetchGuests } from "../api"
 import type { Guest } from "../types"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons"
 
+/* =======================
+   Status Badge
+======================= */
 function StatusBadge({ status }: { status?: string }) {
   const normalized = status?.toLowerCase()
 
@@ -26,29 +31,80 @@ function StatusBadge({ status }: { status?: string }) {
 
   return (
     <span className={`${base} bg-yellow-100 text-yellow-700`}>
-        No Info
+      No Info
     </span>
   )
 }
 
+/* =======================
+   Skeleton Row (Premium Shimmer)
+======================= */
+function SkeletonRow() {
+  return (
+    <tr className="h-14">
+      {[...Array(5)].map((_, i) => (
+        <td key={i} className="p-3">
+          <div className="h-4 rounded skeleton-shimmer"></div>
+        </td>
+      ))}
+    </tr>
+  )
+}
+
+/* =======================
+   Error Banner
+======================= */
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div className="bg-red-100 border border-red-300 text-red-800 p-4 rounded-2xl flex items-center gap-3 animate-slideDown">
+      <FontAwesomeIcon icon={faTriangleExclamation} />
+      <span className="font-semibold">{message}</span>
+    </div>
+  )
+}
+
+/* =======================
+   Undangan Page
+======================= */
 export default function Undangan() {
   const [guests, setGuests] = useState<Guest[]>([])
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("all")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
-    fetchGuests().then(res => setGuests(res.data))
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        const res = await fetchGuests()
+
+        if (!res.data.length) {
+          throw new Error("Data kosong")
+        }
+
+        setGuests(res.data)
+      } catch (err) {
+        console.error(err)
+        setError("Gagal mengambil data undangan.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
   }, [])
 
   const filtered = guests
-    .filter(g => {
+    .filter((g) => {
       if (filter === "hadir") return g.rsvp?.toLowerCase() === "yes"
       if (filter === "tidak") return g.rsvp?.toLowerCase() === "no"
       if (filter === "noinfo") return !g.rsvp
       return true
     })
-    .filter(g =>
-      g.nama.toLowerCase().includes(search.toLowerCase())
+    .filter((g) =>
+      g.nama.toLowerCase().includes(search.toLowerCase()) || g.noUndangan.toString().includes(search)
     )
     .sort((a, b) => a.noUndangan - b.noUndangan)
 
@@ -56,17 +112,19 @@ export default function Undangan() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-4xl font-bold">Daftar Undangan</h1>
 
+      {error && <ErrorBanner message={error} />}
+
       <div className="flex flex-col md:flex-row gap-4">
         <input
           className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg w-full"
-          placeholder="Cari nama..."
+          placeholder="Cari nama atau nomor undangan..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
         <select
           className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg"
-          onChange={e => setFilter(e.target.value)}
+          onChange={(e) => setFilter(e.target.value)}
         >
           <option value="all">Semua</option>
           <option value="hadir">Hadir</option>
@@ -75,7 +133,7 @@ export default function Undangan() {
         </select>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-2xl shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead className="bg-white dark:bg-slate-800 sticky top-0 z-10 shadow-sm">
             <tr>
@@ -84,52 +142,36 @@ export default function Undangan() {
               <th className="p-3">Valid For</th>
               <th className="p-3">RSVP</th>
               <th className="p-3">Person Hadir</th>
-              {/* <th className="p-3">WA</th> */}
-              {/* <th className="p-3">Undangan</th> */}
             </tr>
           </thead>
+
           <tbody>
-            {filtered.map(g => (
-              <tr key={g.noUndangan} className="h-14 border-b border-slate-200 dark:border-slate-700
-             hover:bg-slate-50 dark:hover:bg-slate-800
-             transition-all duration-300 animate-fadeIn">
-                <td className="p-3">{g.noUndangan}</td>
-                <td className="p-3">{g.nama}</td>
-                <td className="p-3">{g.person}</td>
-                <td className="text-center align-middle">
-  <StatusBadge status={g.rsvp} />
-</td>
-                <td className="p-3">{g.attending}</td>
-
-                {/* <td className="p-3">
-                  {g.linkWa ? (
-                    <a href={g.linkWa} target="_blank">
-                      <button className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded-lg">
-                        WA
-                      </button>
-                    </a>
-                  ) : (
-                    <button className="bg-slate-600 px-3 py-1 rounded-lg cursor-not-allowed">
-                      WA
-                    </button>
-                  )}
-                </td>
-
-                <td className="p-3">
-                  {g.url ? (
-                    <a href={g.url} target="_blank">
-                      <button className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg">
-                        Open
-                      </button>
-                    </a>
-                  ) : (
-                    <button className="bg-slate-600 px-3 py-1 rounded-lg cursor-not-allowed">
-                      Open
-                    </button>
-                  )}
-                </td> */}
-              </tr>
-            ))}
+            {loading ? (
+              <>
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+              </>
+            ) : (
+              filtered.map((g) => (
+                <tr
+                  key={g.noUndangan}
+                  className="h-14 border-b border-slate-200 dark:border-slate-700
+                  hover:bg-slate-50 dark:hover:bg-slate-800
+                  transition-all duration-300 animate-fadeIn"
+                >
+                  <td className="p-3">{g.noUndangan}</td>
+                  <td className="p-3">{g.nama}</td>
+                  <td className="p-3">{g.person}</td>
+                  <td className="text-center align-middle">
+                    <StatusBadge status={g.rsvp} />
+                  </td>
+                  <td className="p-3">{g.attending}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

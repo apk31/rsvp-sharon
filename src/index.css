@@ -45,3 +45,64 @@ body {
 .animate-pageFade {
   animation: pageFade 0.35s ease;
 }
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDownFade 0.4s ease forwards;
+}
+
+.animate-slideUp {
+  animation: slideUpFade 0.3s ease forwards;
+  overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -500px 0;
+  }
+  100% {
+    background-position: 500px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #b1b3b6 25%,
+    #f3f4f6 50%,
+    #b1b3b6 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #334155 25%,
+    #475569 50%,
+    #59759c 75%
+  );
+}
